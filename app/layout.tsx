@@ -25,7 +25,7 @@ export default function RootLayout({
       <head>
         {/* Inject brand accent color as CSS variable — used as var(--accent) throughout */}
         <style dangerouslySetInnerHTML={{
-          __html: `:root { --accent: ${accent}; --primary: ${accent}; --primary-foreground: oklch(0.985 0 0); --background: ${accent}; }`
+          __html: `:root { --accent: ${accent}; --primary: ${accent}; --primary-foreground: oklch(0.985 0 0); }`
         }} />
       </head>
       <body className={`font-sans antialiased ${plusJakartaSans.className}`}>

@@ -10,15 +10,12 @@ interface HeaderProps {
 }
 
 // When LOGO_HEIGHT_PX is set the logo renders as a wide banner (height fixed,
-// width auto) and the company-name text is hidden because a banner logo
-// already contains the name. Other clients keep the original 44x44 square
-// logo + company-name layout.
+// width auto). Otherwise the logo renders as an enlarged wordmark. The
+// company-name text is not shown — the logo carries the brand.
 const LOGO_HEIGHT_PX = Number(process.env.LOGO_HEIGHT_PX || 0)
 const isBannerLogo = LOGO_HEIGHT_PX > 0
 
 export function Header({ companyName, phoneDisplay, phoneHref, logoUrl, headerBgColor = "#ffffff" }: HeaderProps) {
-  const isDark = headerBgColor !== "#ffffff" && headerBgColor !== "white"
-
   return (
     <header className="w-full shadow-sm" style={{ backgroundColor: headerBgColor }}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
@@ -36,23 +33,17 @@ export function Header({ companyName, phoneDisplay, phoneHref, logoUrl, headerBg
                 unoptimized
               />
             ) : (
+              // Wide wordmark logo: fix the height and let width auto so it is
+              // not squished into a square. Sits on the dark header bar.
               <Image
                 src={logoUrl}
                 alt={companyName}
-                width={44}
-                height={44}
-                className="h-11 w-11 flex-shrink-0 rounded-lg object-contain"
+                width={3751}
+                height={978}
+                className="h-20 md:h-24 w-auto flex-shrink-0 object-contain"
                 unoptimized
               />
             )
-          )}
-          {!isBannerLogo && (
-            <span
-              className="text-base font-bold leading-tight"
-              style={{ color: isDark ? "white" : "var(--accent)" }}
-            >
-              {companyName}
-            </span>
           )}
         </div>
 
