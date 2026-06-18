@@ -40,7 +40,7 @@ export function Header({ companyName, phoneDisplay, phoneHref, logoUrl, headerBg
                 alt={companyName}
                 width={3751}
                 height={978}
-                className="h-14 md:h-20 w-auto flex-shrink-0 object-contain"
+                className="h-12 md:h-16 w-auto flex-shrink-0 object-contain"
                 unoptimized
               />
             )
