@@ -73,28 +73,23 @@ export default function HomePage() {
             />
           </div>
 
-          {/* Owner / Founder section — shows when ownerName or headshotUrl is set */}
-          {(config.ownerName || config.headshotUrl) && (
-            <div className="mt-8 md:mt-12 mx-auto flex flex-col items-center gap-3">
-              {config.headshotUrl && (
-                <div className="relative h-16 w-16 overflow-hidden rounded-full border-2" style={{ borderColor: "rgba(255,255,255,0.5)" }}>
-                  <Image
-                    src={config.headshotUrl}
-                    alt={config.ownerName || config.companyName}
-                    fill
-                    unoptimized
-                    className="object-cover"
-                  />
-                </div>
-              )}
-              {config.ownerName && (
-                <div className="text-center">
-                  <p className="text-base font-semibold text-gray-900">{config.ownerName}</p>
-                  <p className="text-sm text-gray-500">{config.companyName}</p>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Meet the owner — local trust (mirrors iBuyKC, individual portrait) */}
+          <div className="mt-8 md:mt-12 mx-auto max-w-sm text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: config.accentColor }}>
+              Meet {config.ownerName || config.companyName}
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-gray-900 md:text-2xl text-balance">
+              A local homebuyer helping homeowners sell with confidence.
+            </h2>
+            <Image
+              src="/images/ihomebuyer_landing.png"
+              alt={config.ownerName || config.companyName}
+              width={800}
+              height={800}
+              sizes="(max-width: 768px) 100vw, 384px"
+              className="mt-4 h-auto w-full rounded-2xl"
+            />
+          </div>
 
           {/* VSL (conditional on env vars) */}
           <div className="mt-6 md:mt-8 mx-auto max-w-4xl">
