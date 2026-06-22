@@ -53,6 +53,16 @@ function isInServiceArea(lat: number, lng: number, areas: ServiceArea[]): boolea
   return valid.some(area => haversineDistanceMiles(lat, lng, area.centerLat, area.centerLng) <= area.radiusMiles)
 }
 
+// CA-only service area (hardcoded). Google Places returns the state in
+// administrative_area_level_1 as a 2-letter short_name ("CA"); accept that or the
+// full name, any case. This is the hard accept/reject gate at selection time and
+// REPLACES the radius/haversine check above (now unused). Mirrors iBuyKC's
+// ALLOWED_STATES gate (KS/MO → CA here).
+const ALLOWED_STATES = new Set(["CA", "CALIFORNIA"])
+function isAllowedState(state: string): boolean {
+  return ALLOWED_STATES.has(String(state || "").trim().toUpperCase())
+}
+
 // Singleton loader: the Google Maps script must load EXACTLY ONCE per page.
 // Multiple AddressAutocomplete instances (sticky bar + form + modal) each
 // injecting their own <script> makes Places load multiple times -> "included
@@ -118,27 +128,18 @@ export function AddressAutocomplete({
   const initAutocomplete = () => {
     if (!inputRef.current || !window.google?.maps?.places) return
 
-    // Build bounds covering all service area circles
-    let bounds: google.maps.LatLngBounds | undefined
-    const hasServiceAreas = serviceAreas.length > 0
-    if (hasServiceAreas) {
-      bounds = new google.maps.LatLngBounds()
-      serviceAreas.forEach(area => {
-        // Approximate circle bounding box (1 degree lat ≈ 69 miles)
-        const latOffset = area.radiusMiles / 69
-        const lngOffset = area.radiusMiles / (69 * Math.cos(area.centerLat * Math.PI / 180))
-        bounds!.extend({ lat: area.centerLat - latOffset, lng: area.centerLng - lngOffset })
-        bounds!.extend({ lat: area.centerLat + latOffset, lng: area.centerLng + lngOffset })
-      })
-    }
+    // CA-only prediction bias: a bounding box around California + strictBounds keeps
+    // out-of-state suggestions out of the dropdown. componentRestrictions can't limit
+    // predictions to a state, so the hard accept/reject is the selection-time state
+    // gate below (administrative_area_level_1 === CA). Mirrors iBuyKC's KS/MO box.
+    const bounds: google.maps.LatLngBoundsLiteral = { south: 32.53, west: -124.48, north: 42.01, east: -114.13 }
 
     autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
       componentRestrictions: { country: "us" },
       types: ["address"],
       fields: ["formatted_address", "address_components", "geometry"],
-      // strictBounds when a service-area box exists keeps out-of-area suggestions
-      // out of the dropdown (not just biased). No bounds = nationwide (no restriction).
-      ...(bounds ? { bounds, strictBounds: true } : {}),
+      bounds,
+      strictBounds: true,
     })
 
     autocompleteRef.current.addListener("place_changed", () => {
@@ -164,13 +165,13 @@ export function AddressAutocomplete({
 
       const details: AddressDetails = { formattedAddress: place.formatted_address, lat, lng, state, city, county }
 
-      // Service area validation
-      if (serviceAreas.length > 0 && lat !== undefined && lng !== undefined) {
-        if (!isInServiceArea(lat, lng, serviceAreas)) {
-          onChange(place.formatted_address)
-          onOutOfArea?.(place.formatted_address)
-          return
-        }
+      // CA-only service area: accept ONLY California addresses (selection-time hard gate).
+      // Replaces the former radius/haversine check. Non-CA → onOutOfArea, which drives the
+      // existing "Outside Our Service Area" hard-DQ screen on Continue (survey-card.tsx).
+      if (!isAllowedState(state)) {
+        onChange(place.formatted_address)
+        onOutOfArea?.(place.formatted_address)
+        return
       }
 
       onChange(place.formatted_address)
