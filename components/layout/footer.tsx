@@ -51,9 +51,7 @@ export function Footer({
           </p>
 
           <p className="text-xs text-gray-400 max-w-2xl">
-            {companyName} is not a licensed real estate agent or broker. We are a
-            cash home buying company. All offers are subject to property inspection
-            and due diligence.
+            We are a real estate solutions and investment firm that specializes in helping homeowners get rid of burdensome houses fast. We are investors and problem solvers who can buy your house fast with a fair all cash offer.
           </p>
         </div>
       </div>
